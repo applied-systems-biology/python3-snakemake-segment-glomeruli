@@ -74,7 +74,7 @@ def quantify_tissue_2d(input_dir, output_file, slice_names, voxel_xy, voxel_z):
         json.dump({
             "num-pixels": pixels,
             "volume-microns3": volume
-        }, f)
+        }, f, indent=4)
 
 
 def segment_glomeruli2d(input_file, tissue_mask_file, output_file, voxel_xy):
@@ -203,7 +203,7 @@ def quantify_and_filter_glomeruli3d(label_dir, output_file, slice_names, voxel_x
             "invalid-glomeruli-number": len(invalid_glomeruli),
             "valid-glomeruli-diameter-average": float(diameter_sum / len(glomeruli)),
             "valid-glomeruli-diameter-variance": float((diameter_sum_sq / len(glomeruli)) - (diameter_sum / len(glomeruli)) ** 2)
-        }, f)
+        }, f, indent=4)
 
     # Apply filtering to the labeled images to remove invalid glomeruli
     for file in [label_dir + "/" + x for x in slice_names]:
