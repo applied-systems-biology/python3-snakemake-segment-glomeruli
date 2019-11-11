@@ -7,6 +7,7 @@ import scipy.ndimage as ndimage
 import json
 from collections import defaultdict
 import os
+import skimage.external.tifffile as tifffile
 
 glomeruli_minrad = 15
 glomeruli_maxrad = 65
@@ -60,7 +61,7 @@ def segment_tissue2d(input_file, output_file, voxel_xy):
     kmask = normalize(kmask)
     kmask = (kmask > mahotas.otsu(kmask.astype(np.uint8)))  # remove artifacts of interpolation
 
-    io.imsave(output_file, img_as_ubyte(kmask))
+    tifffile.imsave(output_file, img_as_ubyte(kmask), compress=5)
 
 
 def quantify_tissue_2d(input_dir, output_file, slice_names, voxel_xy, voxel_z):
@@ -80,7 +81,7 @@ def quantify_tissue_2d(input_dir, output_file, slice_names, voxel_xy, voxel_z):
 def segment_glomeruli2d(input_file, tissue_mask_file, output_file, voxel_xy):
     kmask = io.imread(tissue_mask_file)
     if kmask.max() == 0:
-        io.imsave(output_file, kmask)
+        tifffile.imsave(output_file, kmask, compress=5)
         return
 
     # normalize image
@@ -106,7 +107,7 @@ def segment_glomeruli2d(input_file, tissue_mask_file, output_file, voxel_xy):
     else:
         cells = np.zeros_like(img)
 
-    io.imsave(output_file, img_as_ubyte(cells))
+    tifffile.imsave(output_file, img_as_ubyte(cells), compress=5)
 
 
 def segment_glomeruli3d(input_dir, output_dir, slice_names):
@@ -159,13 +160,13 @@ def segment_glomeruli3d(input_dir, output_dir, slice_names):
         if len(labels) > limsize:
             mask = labels.pop(0)
             fname = nfiles.pop(0)
-            io.imsave(fname, img_as_int(mask))
+            tifffile.imsave(fname, img_as_int(mask), compress=5)
 
     # save remaining layers
     for i in range(len(labels)):
         mask = labels.pop(0)
         fname = nfiles.pop(0)
-        io.imsave(fname, img_as_int(mask))
+        tifffile.imsave(fname, img_as_int(mask), compress=5)
 
 
 def quantify_and_filter_glomeruli3d(label_dir, output_file, slice_names, voxel_xy, voxel_z):
@@ -210,5 +211,5 @@ def quantify_and_filter_glomeruli3d(label_dir, output_file, slice_names, voxel_x
         label = io.imread(file)
         for invalid in invalid_glomeruli:
             label[label == invalid] = 0
-        io.imsave(file, img_as_int(label))
+        tifffile.imsave(file, img_as_int(label), compress=5)
 
