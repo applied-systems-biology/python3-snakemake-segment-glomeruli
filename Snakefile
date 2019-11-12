@@ -83,7 +83,7 @@ rule tissue_q:
     output: config["output"] + "{sample}/tissue.json"
     run:
         sample=samples[wildcards["sample"]]
-        algorithms.quantify_tissue_2d(input_dir=config["input"] + wildcards["sample"],
+        algorithms.quantify_tissue_2d(input_dir=config["output"] + wildcards["sample"] + "/tissue",
                                       output_file=output[0],
                                       voxel_xy=sample["voxel-xy"],
                                       voxel_z=sample["voxel-z"],

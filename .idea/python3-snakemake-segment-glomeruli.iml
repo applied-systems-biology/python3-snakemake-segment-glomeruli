@@ -3,6 +3,7 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/venv27" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.7 (python3-snakemake-segment-glomeruli)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

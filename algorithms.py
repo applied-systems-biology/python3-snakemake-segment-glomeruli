@@ -66,9 +66,9 @@ def segment_tissue2d(input_file, output_file, voxel_xy):
 
 def quantify_tissue_2d(input_dir, output_file, slice_names, voxel_xy, voxel_z):
     pixels = 0
-    for file in [input_dir + "/" + x for x in slice_names]:
+    for file in [input_dir + "/" + x for x in set(slice_names)]:
         mask = io.imread(file)
-        pixels += np.count_nonzero(mask)
+        pixels += np.count_nonzero(mask > 0)
 
     volume = pixels * voxel_xy * voxel_xy * voxel_z
     with open(output_file, "w") as f:
@@ -170,15 +170,24 @@ def segment_glomeruli3d(input_dir, output_dir, slice_names):
 
 
 def quantify_and_filter_glomeruli3d(label_dir, output_file, slice_names, voxel_xy, voxel_z):
-    glomeruli = defaultdict(lambda: { "pixels": 0, "volume": 0, "diameter": 0, "label": 0, "valid": True })
+    glomeruli = {}
 
-    for file in [label_dir + "/" + x for x in slice_names]:
+    for file in [label_dir + "/" + x for x in set(slice_names)]:
         label = io.imread(file)
-        u, counts = np.unique(label, return_counts=True)
+        keys, counts = np.unique(label, return_counts=True)
+        print("Found " + str(len(keys)) + " glomeruli in this layer")
         for i in range(len(counts)):
-            key = counts[i]
+            key = int(keys[i])
+            count = counts[i]
+            dkey = str(key)
+
+            if not dkey in glomeruli:
+                glomeruli[dkey] = { "pixels": 0, "volume": 0, "diameter": 0, "label": 0, "valid": True, "zslices": [] }
+
             if key > 0:
-                glomeruli[str(key)]["pixels"] = int(glomeruli[str(key)]["pixels"] + counts[i])
+                glomeruli[dkey]["label"] = key
+                glomeruli[dkey]["zslices"].append(file)
+                glomeruli[dkey]["pixels"] = int(glomeruli[str(key)]["pixels"] + count)
 
     invalid_glomeruli = set()
     glomerulus_min_volume = 4.0 / 3.0 * np.pi * glomeruli_minrad ** 3
@@ -191,6 +200,7 @@ def quantify_and_filter_glomeruli3d(label_dir, output_file, slice_names, voxel_x
         glom["volume"] = float(glom["pixels"] * voxel_xy * voxel_xy * voxel_z)
         glom["diameter"] = float(2.0 * ((3.0 / 4.0 * glom["volume"] / np.pi) ** (1.0 / 3.0)))
         glom["valid"] = glom["volume"] >= glomerulus_min_volume and glom["volume"] <= glomerulus_max_volume
+        glom["nzslices"] = len(glom["zslices"])
         if glom["valid"]:
             diameter_sum += glom["diameter"]
             diameter_sum_sq += glom["diameter"] ** 2
