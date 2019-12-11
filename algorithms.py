@@ -219,13 +219,15 @@ def quantify_and_filter_glomeruli3d(label_dir, output_file, slice_names, voxel_x
         else:
             invalid_glomeruli.add(int(key))
 
+    num_valid_glomeruli = len(glomeruli) - len(invalid_glomeruli)
+
     with open(output_file, "w") as f:
         json.dump({
             "data": glomeruli,
-            "valid-glomeruli-number": len(glomeruli) - len(invalid_glomeruli),
+            "valid-glomeruli-number": num_valid_glomeruli,
             "invalid-glomeruli-number": len(invalid_glomeruli),
-            "valid-glomeruli-diameter-average": float(diameter_sum / len(glomeruli)),
-            "valid-glomeruli-diameter-variance": float((diameter_sum_sq / len(glomeruli)) - (diameter_sum / len(glomeruli)) ** 2)
+            "valid-glomeruli-diameter-average": float(diameter_sum / num_valid_glomeruli),
+            "valid-glomeruli-diameter-variance": float((diameter_sum_sq / num_valid_glomeruli) - (diameter_sum / num_valid_glomeruli) ** 2)
         }, f, indent=4)
 
     # Apply filtering to the labeled images to remove invalid glomeruli
